@@ -1,11 +1,21 @@
 
 import os
+import sys
+import argparse
 from keras.applications import VGG16
 from keras import models
 from keras import layers
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
 
+parser = argparse.ArgumentParser(description='train classifier on gan output', formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument('--image-dir', help='directory containing images to train on; should have training and test subdirectories', required=True)
+parser.add_argument('--save-model-as', help='name to save model as', required=True)
+args = parser.parse_args()
+
+if not os.path.exists(args.image_dir):
+    print ('Error: input images directory does not exist')
+    sys.exit(1)
 
 # we're training on data from vangogh-256
 image_size = 256
@@ -49,8 +59,8 @@ validation_datagen = ImageDataGenerator(rescale=1./255)
 # Change the batchsize according to your system RAM
 train_batchsize = 32
 val_batchsize = 4
-train_dir = os.path.join('.', 'input', 'vangogh-256-classifier', 'training')
-validation_dir = os.path.join('.', 'input', 'vangogh-256-classifier', 'test')
+train_dir = os.path.join(args.image_dir, 'training')
+validation_dir = os.path.join(args.image_dir, 'test')
 
 train_generator = train_datagen.flow_from_directory(
         train_dir,
@@ -79,4 +89,5 @@ history = model.fit_generator(
       verbose=1)
 
 # Save the model
-model.save('vangogh-256-classifier-small_last4.h5')
+model.save(args.save_model_as)
+#model.save('vangogh-256-classifier-small_last4.h5')
