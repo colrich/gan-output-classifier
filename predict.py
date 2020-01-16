@@ -1,10 +1,21 @@
 import os
+import sys
+import argparse
 import shutil
 import ntpath
 import keras.models as models
 from keras.preprocessing import image
 import numpy as np
 
+parser = argparse.ArgumentParser(description='predict gan output classes', formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument('--image-dir', help='directory containing images to classify', required=True)
+parser.add_argument('--output-dir', help='directory to write output images to', required=True)
+args = parser.parse_args()
+
+if not os.path.exists(args.image_dir):
+    print ('Error: input images directory does not exist')
+    sys.exit(1)
+         
 
 labels = ['charcoal-figure-standing', 'charcoal-landscape', 'charcoal-portrait', 'color-portrait-chromatic', 'color-portrait-dark-background', 'field-chromatic-small-horizon', 'landscape-chromatic', 'landscape-with-horizon', 'object-chromatic']
 
@@ -17,7 +28,7 @@ batch_size = 16
 batches = []
 current_batch = []
 index = -1
-for root, dirs, files in os.walk('..\\stylegan2\\results\\00043-generate-images', topdown=True):
+for root, dirs, files in os.walk(args.image_dir, topdown=True):
     for file in files:
         if file.endswith('.png'):
             index += 1
@@ -29,11 +40,11 @@ for root, dirs, files in os.walk('..\\stylegan2\\results\\00043-generate-images'
             current_batch.append(root + os.sep + file)
 
 print('making output directories')
-if not os.path.exists('output'):
-     os.makedirs('output')
+if not os.path.exists(args.output_dir):
+     os.makedirs(args.output_dir)
 for directory in labels:
-    if not os.path.exists('output' + os.sep + directory):
-        os.makedirs('output' + os.sep + directory)
+    if not os.path.exists(args.output_dir + os.sep + directory):
+        os.makedirs(args.output_dir + os.sep + directory)
 
 total = 0
 batch_index = 0
@@ -54,7 +65,7 @@ for batch in batches:
         for result_index in range(len(image_result)):
             if image_result[result_index] >= 0.9:
                 head, tail = ntpath.split(batch[image_index])
-                shutil.move(batch[image_index], os.path.join('output', labels[result_index], tail))
+                shutil.move(batch[image_index], os.path.join(args.output_dir, labels[result_index], tail))
                 break
         image_index += 1
 
