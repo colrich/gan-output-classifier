@@ -17,8 +17,7 @@ if not os.path.exists(args.image_dir):
     print ('Error: input images directory does not exist')
     sys.exit(1)
 
-# we're training on data from vangogh-256
-image_size = 256
+image_size = 224
 
 # load the pretrained model
 vgg_conv = VGG16(weights='imagenet', include_top=False, input_shape=(image_size, image_size, 3))
@@ -83,7 +82,7 @@ model.compile(loss='categorical_crossentropy',
 history = model.fit_generator(
       train_generator,
       steps_per_epoch=train_generator.samples/train_generator.batch_size ,
-      epochs=30,
+      epochs=20,
       validation_data=validation_generator,
       validation_steps=validation_generator.samples/validation_generator.batch_size,
       verbose=1)
