@@ -10,6 +10,7 @@ import numpy as np
 parser = argparse.ArgumentParser(description='predict gan output classes', formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('--image-dir', help='directory containing images to classify', required=True)
 parser.add_argument('--output-dir', help='directory to write output images to', required=True)
+parser.add_argument('--model', help='model to use for predictions', required=True)
 args = parser.parse_args()
 
 if not os.path.exists(args.image_dir):
@@ -20,9 +21,11 @@ if not os.path.exists(args.image_dir):
 labels = ['charcoal-figure-standing', 'charcoal-landscape', 'charcoal-portrait', 'color-portrait-chromatic', 'color-portrait-dark-background', 'field-chromatic-small-horizon', 'landscape-chromatic', 'landscape-with-horizon', 'object-chromatic']
 
 # we're classifying ata from vangogh-256
-image_size = 256
+#image_size = 256
+image_size = 224
 
-model = models.load_model('vangogh-256-classifier-small_last4.h5')
+#model = models.load_model('vangogh-256-classifier-small_last4.h5')
+model = models.load_model(args.model)
 
 batch_size = 16
 batches = []
@@ -54,6 +57,8 @@ for batch in batches:
     for image_file in batch:
         img = image.load_img(image_file, target_size=(image_size, image_size))
         img = image.img_to_array(img)
+        img = img.astype('float32')
+        img /= 255.0
         img = img.reshape(image_size, image_size, 3)
         images.append(img)
     result = model.predict(np.array(images), batch_size=len(batch))
